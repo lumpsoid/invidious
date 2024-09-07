@@ -55,7 +55,7 @@ jobs:
           context: .
           file: docker/Dockerfile
           push: true
-          platforms: linux/${{ matrix.platform }}
+          platforms: linux/arm64/v8
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.platform }}
