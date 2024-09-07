@@ -1,21 +1,26 @@
-name: Build and release container
+name: Build and release container test
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  release:
+  build-and-push-image:
+    permissions:
+      packages: write
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - arm64
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Crystal
@@ -33,8 +38,6 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -46,47 +49,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          flavor: |
-            latest=false
-          tags: |
-            type=semver,pattern={{version}}
-            type=raw,value=latest
-
-      - name: Build and push Docker AMD64 image for Push Event
+      - name: Build and push Docker image for ${{ matrix.platform }}
         uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile
-          platforms: linux/amd64
-          labels: ${{ steps.meta.outputs.labels }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          build-args: |
-            "release=1"
-
-      - name: Docker meta
-        id: meta-arm64
-        uses: docker/metadata-action@v5
-        with:
-          flavor: |
-            latest=false
-            suffix=-arm64
+          platforms: linux/${{ matrix.platform }}
           tags: |
-            type=semver,pattern={{version}}
-            type=raw,value=latest
-
-      - name: Build and push Docker ARM64 image for Push Event
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/Dockerfile.arm64
-          platforms: linux/arm64/v8
-          labels: ${{ steps.meta-arm64.outputs.labels }}
-          push: true
-          tags: ${{ steps.meta-arm64.outputs.tags }}
-          build-args: |
-            "release=1"
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.platform }}
