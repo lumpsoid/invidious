@@ -79,6 +79,10 @@
 
             <div class="video-card-row">
                 <a href="<%= link_url %>"><p dir="auto"><%= HTML.escape(item.title) %></p></a>
+                <%-
+                    link_yt_embed = URI.new(scheme: "https", host: "www.youtube.com", path: "/embed/#{item.id}")
+                -%>
+                <a id="link-yt-embed" rel="noreferrer noopener" data-base-url="<%= link_yt_embed %>" href="<%= link_yt_embed %>"><%= translate(locale, "videoinfo_youTube_embed_link") %></a>
             </div>
 
             <div class="video-card-row flexible">
@@ -165,6 +169,10 @@
 
             <div class="video-card-row">
                 <a href="<%= link_url %>"><p dir="auto"><%= HTML.escape(item.title) %></p></a>
+                <%-
+                    link_yt_embed = URI.new(scheme: "https", host: "www.youtube.com", path: "/embed/#{item.id}")
+                -%>
+                <a id="link-yt-embed" rel="noreferrer noopener" data-base-url="<%= link_yt_embed %>" href="<%= link_yt_embed %>"><%= translate(locale, "videoinfo_youTube_embed_link") %></a>
             </div>
 
             <div class="video-card-row flexible">
